@@ -1,17 +1,71 @@
 let humanScore = 0;
 let computerScore = 0;
+let gameStarted = false;
+
+document.getElementById("start-btn").addEventListener("click", startCountdown);
+
+document.getElementById("rock").addEventListener("click", () => {
+  if (!gameStarted) return;
+
+  playGame("rock");
+});
+
+document.getElementById("paper").addEventListener("click", () => {
+  if (!gameStarted) return;
+
+  playGame("paper");
+});
+
+document.getElementById("scissors").addEventListener("click", () => {
+  if (!gameStarted) return;
+
+  playGame("scissors");
+});
+
+function playGame(humanChoice) {
+  const computerChoice = getComputerChoice();
+
+  const result = playRound(humanChoice, computerChoice);
+
+  document.getElementById("result-text").textContent = result;
+
+  updateScore();
+
+  checkWinner();
+}
+
+function startCountdown() {
+  gameStarted = false;
+
+  let count = 3;
+
+  const countdownText = document.getElementById("countdown");
+
+  countdownText.textContent = count;
+
+  const timer = setInterval(() => {
+    count--;
+
+    if (count > 0) {
+      countdownText.textContent = count;
+    } else if (count === 0) {
+      countdownText.textContent = "GO!";
+    } else {
+      clearInterval(timer);
+
+      countdownText.textContent = "";
+
+      gameStarted = true;
+    }
+  }, 1000);
+}
 
 function getComputerChoice() {
   const choices = ["rock", "paper", "scissors"];
-  const randomIndex = Math.floor(Math.random() * choices.length);
-  return choices[randomIndex];
-}
 
-function getHumanChoice() {
-  let choice = (
-    prompt("Enter your choice (rock, paper, or scissors): ") || ""
-  ).toLowerCase();
-  return choice;
+  const randomIndex = Math.floor(Math.random() * choices.length);
+
+  return choices[randomIndex];
 }
 
 function capitalize(word) {
@@ -22,41 +76,60 @@ function playRound(humanChoice, computerChoice) {
   humanChoice = humanChoice.toLowerCase();
 
   if (humanChoice === computerChoice) {
-    return "It's a tie!";
-  } else if (
+    return `It's a tie! Both chose ${capitalize(humanChoice)}.`;
+  }
+
+  if (
     (humanChoice === "rock" && computerChoice === "scissors") ||
     (humanChoice === "paper" && computerChoice === "rock") ||
     (humanChoice === "scissors" && computerChoice === "paper")
   ) {
     humanScore++;
-    return `You win ${capitalize(humanChoice)} beats ${capitalize(computerChoice)} +1 point added to your total of ${humanScore}!`;
-  } else {
-    computerScore++;
-    return `Computer wins ${capitalize(computerChoice)} beats ${capitalize(humanChoice)} +1 point added to computer total of ${computerScore}!`;
+
+    return `You win! ${capitalize(
+      humanChoice,
+    )} beats ${capitalize(computerChoice)}.`;
+  }
+
+  computerScore++;
+
+  return `Computer wins! ${capitalize(
+    computerChoice,
+  )} beats ${capitalize(humanChoice)}.`;
+}
+
+function updateScore() {
+  document.getElementById("human-score").textContent = humanScore;
+
+  document.getElementById("computer-score").textContent = computerScore;
+}
+
+function checkWinner() {
+  if (humanScore === 5) {
+    gameStarted = false;
+
+    document.getElementById("result-text").textContent = "You won the game!";
+
+    setTimeout(resetGame, 2000);
+  } else if (computerScore === 5) {
+    gameStarted = false;
+
+    document.getElementById("result-text").textContent =
+      "Computer won the game!";
+
+    setTimeout(resetGame, 2000);
   }
 }
 
-function playGame() {
-  for (let i = 0; i < 5; i++) {
-    const humanSelection = getHumanChoice();
-    const computerSelection = getComputerChoice();
+function resetGame() {
+  humanScore = 0;
 
-    const result = playRound(humanSelection, computerSelection);
+  computerScore = 0;
 
-    console.log(result);
+  updateScore();
 
-    alert(
-      `${result}\n\nCurrent Score - \nYou: ${humanScore}\nComputer: ${computerScore}`,
-    );
-  }
+  document.getElementById("result-text").textContent =
+    "Click Start to play again";
 
-  if (humanScore > computerScore) {
-    alert("You won the game!");
-  } else if (computerScore > humanScore) {
-    alert("Computer won the game!");
-  } else {
-    alert("The game is a tie!");
-  }
+  document.getElementById("countdown").textContent = "";
 }
-
-playGame();
